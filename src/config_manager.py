@@ -17,7 +17,7 @@ class ConfigManager:
         self.default_config = {
             'primary_shortcut': 'F12',
             'model': 'base',
-            'typing_speed': 150,
+            'key_delay': 15,  # Delay between keystrokes in milliseconds for ydotool
             'use_clipboard': False,
             'window_position': None,
             'always_on_top': True,

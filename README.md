@@ -11,6 +11,7 @@ Super useful for voice prompting AI models and speaking terminal commands.
 Here's a quick [demo](https://www.youtube.com/watch?v=6uY2WySVNQE)
 
 ## Screenshots
+
 <table align="center">
 <tr>
 <td><img src="https://raw.githubusercontent.com/cjams/whispertux/main/assets/whispertux-main.png" alt="whispertux-main" width="400"></td>
@@ -86,7 +87,7 @@ Settings are stored in `~/.config/whispertux/config.json`:
 {
   "primary_shortcut": "F12",
   "model": "base",
-  "typing_speed": 150,
+  "key_delay": 15,
   "use_clipboard": false,
   "always_on_top": true,
   "theme": "darkly",

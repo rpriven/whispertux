@@ -18,10 +18,10 @@ class TextInjector:
 
         # Initialize settings from config if available
         if self.config_manager:
-            self.typing_speed = self.config_manager.get_setting('typing_speed', 150)
+            self.key_delay = self.config_manager.get_setting('key_delay', 15)
             self.use_clipboard_fallback = self.config_manager.get_setting('use_clipboard', False)
         else:
-            self.typing_speed = 150  # Default WPM
+            self.key_delay = 15  # Default key delay in milliseconds
             self.use_clipboard_fallback = False
 
         # Check if ydotool is available
@@ -168,11 +168,11 @@ class TextInjector:
         return processed
 
     def _inject_via_ydotool(self, text: str) -> bool:
-        """Inject text using ydotool with --delay 50 and raw text (no escaping)"""
+        """Inject text using ydotool with configurable --key-delay and raw text (no escaping)"""
         try:
-            cmd = ['ydotool', 'type', '--delay', '50', text]
+            cmd = ['ydotool', 'type', '--key-delay', str(self.key_delay), text]
             
-            print(f"Injecting text with ydotool: ydotool type --delay 50 [text]")
+            print(f"Injecting text with ydotool: ydotool type --key-delay {self.key_delay} [text]")
 
             # Run the command
             result = subprocess.run(
@@ -245,11 +245,6 @@ class TextInjector:
             print(f"ERROR: Clipboard injection failed: {e}")
             return False
 
-    def set_typing_speed(self, wpm: int):
-        """Set the typing speed in words per minute (10-200 WPM)"""
-        self.typing_speed = max(10, min(200, wpm))
-        print(f"Typing speed set to {self.typing_speed} WPM")
-
     def set_use_clipboard_fallback(self, use_clipboard: bool):
         """Enable or disable clipboard fallback"""
         self.use_clipboard_fallback = use_clipboard
@@ -259,6 +254,6 @@ class TextInjector:
         """Get the status of the text injector"""
         return {
             'ydotool_available': self.ydotool_available,
-            'typing_speed': self.typing_speed,
+            'key_delay': self.key_delay,
             'use_clipboard_fallback': self.use_clipboard_fallback
         }

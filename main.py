@@ -322,22 +322,19 @@ class SettingsDialog:
         )
         clipboard_check.pack(anchor=W)
 
-        # Typing speed setting
-        typing_frame = ttk.Frame(general_frame)
-        typing_frame.pack(fill=X, pady=(5, 5))
+        # Key delay setting
+        key_delay_frame = ttk.Frame(general_frame)
+        key_delay_frame.pack(fill=X, pady=(5, 5))
 
-        ttk.Label(typing_frame, text="Typing Speed (chars/min):").pack(side=LEFT)
+        ttk.Label(key_delay_frame, text="Key Delay (ms):").pack(side=LEFT)
 
-        self.typing_speed_var = tk.IntVar(value=self.config.get_setting('typing_speed', 150))
-        typing_spin = ttk.Spinbox(
-            typing_frame,
-            from_=50,
-            to=500,
-            increment=25,
-            textvariable=self.typing_speed_var,
+        self.key_delay_var = tk.StringVar(value=str(self.config.get_setting('key_delay', 15)))
+        key_delay_entry = ttk.Entry(
+            key_delay_frame,
+            textvariable=self.key_delay_var,
             width=10
         )
-        typing_spin.pack(side=RIGHT)
+        key_delay_entry.pack(side=RIGHT)
 
         # Keyboard device selection
         keyboard_frame = ttk.Frame(general_frame)
@@ -662,10 +659,21 @@ class SettingsDialog:
             selected_keyboard_index = self.keyboard_options.index(self.keyboard_device_var.get())
             selected_keyboard_path = self.keyboard_values[selected_keyboard_index]
 
+            # Validate and update key delay setting
+            key_delay_str = self.key_delay_var.get().strip()
+            try:
+                key_delay_value = int(key_delay_str)
+                if key_delay_value < 1:
+                    messagebox.showwarning("Invalid Input", "Key delay must be a positive integer (minimum 1ms).")
+                    return
+                self.config.set_setting('key_delay', key_delay_value)
+            except ValueError:
+                messagebox.showwarning("Invalid Input", "Key delay must be a valid number.")
+                return
+
             # Update all settings in config
             self.config.set_setting('primary_shortcut', new_shortcut)
             self.config.set_setting('always_on_top', self.always_on_top_var.get())
-            self.config.set_setting('typing_speed', self.typing_speed_var.get())
             self.config.set_setting('use_clipboard', self.use_clipboard_var.get())
             self.config.set_setting('keyboard_device', selected_keyboard_path)
 
@@ -748,7 +756,6 @@ class SettingsDialog:
 
             # Update other settings
             self.config.set_setting('always_on_top', self.always_on_top_var.get())
-            self.config.set_setting('typing_speed', self.typing_speed_var.get())
             self.config.set_setting('use_clipboard', self.use_clipboard_var.get())
 
             # Save configuration
@@ -783,7 +790,7 @@ class SettingsDialog:
                 new_shortcut = self.config.get_setting('primary_shortcut')
                 self.shortcut_var.set(new_shortcut)
                 self.always_on_top_var.set(self.config.get_setting('always_on_top'))
-                self.typing_speed_var.set(self.config.get_setting('typing_speed'))
+                self.key_delay_var.set(str(self.config.get_setting('key_delay')))
                 self.use_clipboard_var.set(self.config.get_setting('use_clipboard'))
 
                 # Update the current shortcut display in the dialog
@@ -1068,18 +1075,18 @@ class WhisperTuxApp:
         )
         self.shortcut_display_label.pack(side=LEFT, padx=(5, 0))
 
-        # Typing speed info
-        typing_info_frame = ttk.Frame(settings_info_frame)
-        typing_info_frame.pack(fill=X, pady=1)
+        # Key delay info
+        key_delay_info_frame = ttk.Frame(settings_info_frame)
+        key_delay_info_frame.pack(fill=X, pady=1)
 
-        ttk.Label(typing_info_frame, text="Speed:", font=("Arial", 9)).pack(side=LEFT)
-        self.typing_speed_display_label = ttk.Label(
-            typing_info_frame,
-            text=f"{self.config.get_setting('typing_speed', 150)} cpm",
+        ttk.Label(key_delay_info_frame, text="Key Delay:", font=("Arial", 9)).pack(side=LEFT)
+        self.key_delay_display_label = ttk.Label(
+            key_delay_info_frame,
+            text=f"{self.config.get_setting('key_delay', 15)}ms",
             font=("Arial", 9, "bold"),
             bootstyle=INFO
         )
-        self.typing_speed_display_label.pack(side=LEFT, padx=(5, 0))
+        self.key_delay_display_label.pack(side=LEFT, padx=(5, 0))
 
 
     def _create_audio_section(self):
@@ -1430,11 +1437,11 @@ class WhisperTuxApp:
             self.model_display_label.config(text=current_model)
             print(f"Updated model display to: {current_model}")
 
-        # Update typing speed display
-        if self.typing_speed_display_label:
-            typing_speed = self.config.get_setting('typing_speed', 150)
-            self.typing_speed_display_label.config(text=f"{typing_speed} cpm")
-            print(f"Updated typing speed display to: {typing_speed}")
+        # Update key delay display
+        if self.key_delay_display_label:
+            key_delay = self.config.get_setting('key_delay', 15)
+            self.key_delay_display_label.config(text=f"{key_delay}ms")
+            print(f"Updated key delay display to: {key_delay}ms")
 
     def _show_error(self, message):
         """Show error message"""
