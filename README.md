@@ -1,7 +1,5 @@
 # WhisperTux
 
-> **⚡ Performance-Optimized Fork:** This fork includes significant performance improvements and comprehensive documentation. See [Performance Optimizations](#performance-optimizations) below for details. Original project: [cjams/whispertux](https://github.com/cjams/whispertux)
-
 Simple voice dictation application for Linux. Press the shortcut key, speak, press the shortcut key again, and text will appear in whatever app owns the cursor at the time.
 
 Uses [whisper.cpp](https://github.com/ggml-org/whisper.cpp) for offline speech-to-text transcription.
@@ -29,73 +27,69 @@ Here's a quick [demo](https://www.youtube.com/watch?v=6uY2WySVNQE)
 - Automatic text injection into focused applications
 - Configurable [whisper](https://github.com/openai/whisper) models and shortcuts
 
-## Performance Optimizations
+## Performance Optimization
 
-This fork includes significant performance improvements discovered through extensive testing on AMD Ryzen CPUs:
+WhisperTux performance can be significantly improved through thread count tuning for your specific CPU.
 
-### Thread Count Tuning (5.7x Faster!)
+### Thread Count Tuning
 
-**Key Discovery:** Using optimal thread count instead of all CPU cores dramatically improves performance.
+**Key Discovery:** Using an optimal thread count instead of all CPU cores can dramatically improve performance.
 
-- **Before:** 24+ seconds for 11-second audio sample (16 threads)
-- **After:** ~3 seconds for same sample (12 threads, benchmarked optimal for AMD Ryzen 7 8845HS)
-- **Improvement:** ~8x faster transcription
-- **Note:** Optimal count varies by CPU - test with benchmark.sh
+**Performance Example (AMD Ryzen 7 8845HS, 8-core/16-thread):**
+- Default 4 threads: ~4.4 seconds for 11-second audio
+- Optimal 12 threads: ~3.0 seconds for same audio
+- **Improvement: ~1.5x faster transcription**
 
-**Why fewer threads are faster:**
-- Prevents cache thrashing between cores
-- Reduces memory bandwidth saturation
-- Eliminates thread synchronization overhead
+**Why thread count matters:**
+- Too few threads: Underutilizes CPU capability
+- Too many threads: Cache thrashing and memory bandwidth saturation
+- Optimal count: Balances parallel processing with resource efficiency
 
-**Optimal thread counts by CPU:**
-- 8-core CPUs (16 threads): Use 4 threads
-- 6-core CPUs (12 threads): Use 3-4 threads
-- 4-core CPUs (8 threads): Use 2-3 threads
+### Finding Your Optimal Thread Count
 
-See [WORKING_CONFIG.md](WORKING_CONFIG.md) for detailed build configuration and benchmarks.
+**1. Check your CPU specifications:**
+```bash
+nproc  # Shows total hardware threads
+lscpu | grep "CPU(s):"  # More detailed CPU info
+```
 
-### How to Apply These Optimizations
+**2. Test different thread counts:**
 
-**The optimization is already built into this fork!** The thread count is configured in `src/whisper_manager.py`.
-
-**If using the original WhisperTux and want this optimization:**
-
-1. Edit `src/whisper_manager.py` (around line 147)
-2. Change the threads parameter:
+Edit `src/whisper_manager.py` (around line 147):
 ```python
 # Find this line:
-'--threads', '16',  # or whatever it currently is
+'--threads', '4',
 
-# Change to optimal for your CPU:
-'--threads', '12',   # For AMD Ryzen 7 8845HS (8-core/16-thread)
-                     # Benchmark different values: 4, 8, 12 to find your optimal
+# Try different values based on your CPU:
+'--threads', '12',  # Test: 4, 8, 12, 16, etc.
 ```
 
-**To find your optimal thread count:**
+**3. Benchmark each configuration:**
+
+Create a simple benchmark script:
 ```bash
-# Get your CPU core/thread count
-nproc  # Shows total threads
+#!/bin/bash
+# Record a 10-second test audio sample first
 
-# General rule: Use 1/4 to 1/3 of total threads
-# Example: 16 threads → use 4
-#          12 threads → use 3-4
-#           8 threads → use 2-3
+for threads in 4 8 12 16; do
+    echo "Testing $threads threads..."
+    sed -i "s/'--threads', '[0-9]*'/'--threads', '$threads'/" src/whisper_manager.py
+    time python3 main.py  # Or use your test audio
+done
 ```
 
-**Test different thread counts:**
-```bash
-# Use the included benchmark script
-./benchmark.sh
-```
+**General Guidelines (starting points to test):**
+- 16-thread CPUs: Try 12, 8, or 4 threads
+- 12-thread CPUs: Try 8, 6, or 4 threads
+- 8-thread CPUs: Try 6, 4, or 3 threads
+- 4-thread CPUs: Try 3 or 2 threads
 
-### Comprehensive Documentation
+**Note:** Optimal count varies by CPU architecture (Intel vs AMD), model, and system load. Always benchmark on your specific hardware.
 
-- **[WORKING_CONFIG.md](WORKING_CONFIG.md)** - Optimal whisper.cpp build configuration, thread tuning, model selection
-- **[RECOVERY_NOTES.md](RECOVERY_NOTES.md)** - Troubleshooting guide, performance debugging, recovery procedures
+### Additional Documentation
 
-### Contributing Back
-
-These optimizations are being submitted as PRs to the upstream project. If you benefit from these improvements, please consider contributing back to [cjams/whispertux](https://github.com/cjams/whispertux).
+- **[WORKING_CONFIG.md](WORKING_CONFIG.md)** - Real-world optimized configuration example (AMD Ryzen 7 8845HS)
+- **[RECOVERY_NOTES.md](RECOVERY_NOTES.md)** - Troubleshooting guide for performance issues and build problems
 
 ## Installation
 

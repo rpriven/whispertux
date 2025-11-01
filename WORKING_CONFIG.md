@@ -1,6 +1,9 @@
 # WhisperTux Working Configuration
+
+> **Note:** This document shares a real-world optimized configuration for WhisperTux on AMD Ryzen 7 8845HS. Your optimal settings may differ based on your hardware. Use this as a reference for performance tuning on your system.
+
 **Date:** 2025-10-21 17:16 (FINAL)
-**Status:** ⚡ BLAZING FAST - Optimized to 1 second transcription!
+**Status:** ⚡ BLAZING FAST - Optimized to 1 second transcription on test hardware
 
 ## Current Configuration
 
