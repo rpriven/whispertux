@@ -1,5 +1,7 @@
 # WhisperTux
 
+> **⚡ Performance-Optimized Fork:** This fork includes significant performance improvements and comprehensive documentation. See [Performance Optimizations](#performance-optimizations) below for details. Original project: [cjams/whispertux](https://github.com/cjams/whispertux)
+
 Simple voice dictation application for Linux. Press the shortcut key, speak, press the shortcut key again, and text will appear in whatever app owns the cursor at the time.
 
 Uses [whisper.cpp](https://github.com/ggml-org/whisper.cpp) for offline speech-to-text transcription.
@@ -26,6 +28,39 @@ Here's a quick [demo](https://www.youtube.com/watch?v=6uY2WySVNQE)
 - Global keyboard shortcuts for system-wide operation
 - Automatic text injection into focused applications
 - Configurable [whisper](https://github.com/openai/whisper) models and shortcuts
+
+## Performance Optimizations
+
+This fork includes significant performance improvements discovered through extensive testing on AMD Ryzen CPUs:
+
+### Thread Count Tuning (5.7x Faster!)
+
+**Key Discovery:** Using optimal thread count instead of all CPU cores dramatically improves performance.
+
+- **Before:** 24+ seconds for 11-second audio sample (16 threads)
+- **After:** ~4 seconds for same sample (4 threads)
+- **Improvement:** 5.7x faster transcription
+
+**Why fewer threads are faster:**
+- Prevents cache thrashing between cores
+- Reduces memory bandwidth saturation
+- Eliminates thread synchronization overhead
+
+**Optimal thread counts by CPU:**
+- 8-core CPUs (16 threads): Use 4 threads
+- 6-core CPUs (12 threads): Use 3-4 threads
+- 4-core CPUs (8 threads): Use 2-3 threads
+
+See [WORKING_CONFIG.md](WORKING_CONFIG.md) for detailed build configuration and benchmarks.
+
+### Comprehensive Documentation
+
+- **[WORKING_CONFIG.md](WORKING_CONFIG.md)** - Optimal whisper.cpp build configuration, thread tuning, model selection
+- **[RECOVERY_NOTES.md](RECOVERY_NOTES.md)** - Troubleshooting guide, performance debugging, recovery procedures
+
+### Contributing Back
+
+These optimizations are being submitted as PRs to the upstream project. If you benefit from these improvements, please consider contributing back to [cjams/whispertux](https://github.com/cjams/whispertux).
 
 ## Installation
 
