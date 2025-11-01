@@ -38,8 +38,9 @@ This fork includes significant performance improvements discovered through exten
 **Key Discovery:** Using optimal thread count instead of all CPU cores dramatically improves performance.
 
 - **Before:** 24+ seconds for 11-second audio sample (16 threads)
-- **After:** ~4 seconds for same sample (4 threads)
-- **Improvement:** 5.7x faster transcription
+- **After:** ~3 seconds for same sample (12 threads, benchmarked optimal for AMD Ryzen 7 8845HS)
+- **Improvement:** ~8x faster transcription
+- **Note:** Optimal count varies by CPU - test with benchmark.sh
 
 **Why fewer threads are faster:**
 - Prevents cache thrashing between cores
@@ -52,6 +53,40 @@ This fork includes significant performance improvements discovered through exten
 - 4-core CPUs (8 threads): Use 2-3 threads
 
 See [WORKING_CONFIG.md](WORKING_CONFIG.md) for detailed build configuration and benchmarks.
+
+### How to Apply These Optimizations
+
+**The optimization is already built into this fork!** The thread count is configured in `src/whisper_manager.py`.
+
+**If using the original WhisperTux and want this optimization:**
+
+1. Edit `src/whisper_manager.py` (around line 147)
+2. Change the threads parameter:
+```python
+# Find this line:
+'--threads', '16',  # or whatever it currently is
+
+# Change to optimal for your CPU:
+'--threads', '12',   # For AMD Ryzen 7 8845HS (8-core/16-thread)
+                     # Benchmark different values: 4, 8, 12 to find your optimal
+```
+
+**To find your optimal thread count:**
+```bash
+# Get your CPU core/thread count
+nproc  # Shows total threads
+
+# General rule: Use 1/4 to 1/3 of total threads
+# Example: 16 threads → use 4
+#          12 threads → use 3-4
+#           8 threads → use 2-3
+```
+
+**Test different thread counts:**
+```bash
+# Use the included benchmark script
+./benchmark.sh
+```
 
 ### Comprehensive Documentation
 
